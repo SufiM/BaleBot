@@ -17,7 +17,7 @@ class PriceAPIError(Exception):
 
 def fetch_prices():
     try:
-        response = requests.get(PRICE_API_URL, timeout=10)
+        response = requests.get(PRICE_API_URL, timeout=30)
         response.raise_for_status()
         data = response.json()
     except Exception as exc:
@@ -32,6 +32,11 @@ def fetch_prices():
         item = price_map.get(symbol)
         if not item:
             return None
-        return item.get("sell")
+
+        price = item.get("sell")
+        if price is None:
+            return None
+
+        return int(float(price))
 
     return {name: get_price(symbol) for name, symbol in TARGET_SYMBOLS.items()}
