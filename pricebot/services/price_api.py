@@ -18,12 +18,23 @@ class PriceAPIError(Exception):
 def fetch_prices():
     try:
         response = requests.get(PRICE_API_URL, timeout=30)
+        print(response)
         response.raise_for_status()
         data = response.json()
-    except Exception as exc:
+        print(data)
+    
+    except requests.exceptions.RequestException as exc:
+        print("HTTP error:", exc)
+        if hasattr(exc, "response") and exc.response is not None:
+            print("Response body:", exc.response.text)
         raise PriceAPIError(f"Failed to fetch prices: {exc}")
 
+    except ValueError as exc:
+        print("JSON decode error:", exc)
+        raise PriceAPIError(f"Invalid JSON response: {exc}")
+
     if not isinstance(data, list):
+        print("Unexpected API response:", data)
         raise PriceAPIError("Invalid API format: expected list")
 
     price_map = {item.get("symbol"): item for item in data if "symbol" in item}
