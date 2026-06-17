@@ -47,8 +47,12 @@ async def send_prices(update, context, is_edit=False):
     try:
         prices = await sync_to_async(fetch_prices)()
         text = format_prices(prices)
-    except PriceAPIError:
-        logger.warning("Failed to fetch prices for user %s", update.effective_user.id)
+    except PriceAPIError as exc:
+        logger.exception(
+            "Failed to fetch prices for user %s: %s",
+            update.effective_user.id,
+            exc,
+        )        
         text = "مشکلی پیش آمده است .لطفا دوباره تلاش کنید."
 
     if is_edit:
