@@ -67,10 +67,13 @@ Create a .env file in the root of the project:
 DEBUG=True
 SECRET_KEY=your_secret_key_here
 
+ALLOWED_HOSTS=127.0.0.1 # In Local
+
 PRICEBOT_TOKEN=your_bale_bot_token
 BOT_NAME=your_bale_bot_name
 
-PRICE_API_URL=https://local.studio.persianapi.com/index.php/web-service/common/gold-currency-coin?format=json&limit=30&page=1
+PRICE_API_URL=https://api.nerkh.io/v1/prices/json/all
+PRICE_API_KEY=
 
 ```
 
