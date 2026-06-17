@@ -2,52 +2,50 @@ import requests
 from decouple import config
 
 PRICE_API_URL = config("PRICE_API_URL")
-
-TARGET_SYMBOLS = {
-    "usd": "USD",
-    "eur": "EUR",
-    "coin": "EMAMI1",
-    "gold": "GOL18",
-}
+PRICE_API_KEY = config("PRICE_API_KEY")
 
 
 class PriceAPIError(Exception):
     pass
 
 
+def _to_int(value):
+    if value is None:
+        return None
+    return int(value)
+
+
 def fetch_prices():
+    headers = {
+        "Authorization": f"Bearer {PRICE_API_KEY}",
+        "Accept": "application/json",
+    }
+
     try:
-        response = requests.get(PRICE_API_URL, timeout=10)
-        print(response)
+        response = requests.get(
+            PRICE_API_URL,
+            headers=headers,
+            timeout=10,
+        )
         response.raise_for_status()
-        data = response.json()
-        print(data)
-    
-    except requests.exceptions.RequestException as exc:
-        print("HTTP error:", exc)
-        if hasattr(exc, "response") and exc.response is not None:
-            print("Response body:", exc.response.text)
+        payload = response.json()
+
+    except Exception as exc:
         raise PriceAPIError(f"Failed to fetch prices: {exc}")
 
-    except ValueError as exc:
-        print("JSON decode error:", exc)
-        raise PriceAPIError(f"Invalid JSON response: {exc}")
+    try:
+        data = payload["data"]
 
-    if not isinstance(data, list):
-        print("Unexpected API response:", data)
-        raise PriceAPIError("Invalid API format: expected list")
+        prices = {
+            "gold": _to_int(data["gold"]["GOLD18K"]["current"]),
+            "coin": _to_int(data["gold"]["SEKE_EMAMI"]["current"]),
+            "usd": _to_int(data["currency"]["USD"]["current"]),
+            "eur": _to_int(data["currency"]["EUR"]["current"]),
+        }
 
-    price_map = {item.get("symbol"): item for item in data if "symbol" in item}
+        return prices
 
-    def get_price(symbol):
-        item = price_map.get(symbol)
-        if not item:
-            return None
-
-        price = item.get("sell")
-        if price is None:
-            return None
-
-        return int(float(price))
-
-    return {name: get_price(symbol) for name, symbol in TARGET_SYMBOLS.items()}
+    except KeyError as exc:
+        raise PriceAPIError(
+            f"Unexpected API format, missing field: {exc}. "
+        )
