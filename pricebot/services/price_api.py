@@ -17,7 +17,7 @@ class PriceAPIError(Exception):
 
 def fetch_prices():
     try:
-        response = requests.get(PRICE_API_URL, timeout=30)
+        response = requests.get(PRICE_API_URL, timeout=10)
         print(response)
         response.raise_for_status()
         data = response.json()
