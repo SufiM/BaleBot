@@ -67,7 +67,7 @@ Create a .env file in the root of the project:
 DEBUG=True
 SECRET_KEY=your_secret_key_here
 
-ALLOWED_HOSTS=127.0.0.1 # In Local
+ALLOWED_HOSTS=
 
 PRICEBOT_TOKEN=your_bale_bot_token
 BOT_NAME=your_bale_bot_name
