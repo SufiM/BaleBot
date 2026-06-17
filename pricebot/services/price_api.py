@@ -3,11 +3,11 @@ from decouple import config
 
 PRICE_API_URL = config("PRICE_API_URL")
 
-TARGET_KEYS = {
-    "gold": 137120,
-    "usd": 137202,
-    "eur": 137204,
-    "coin": 137137,
+TARGET_SYMBOLS = {
+    "usd": "USD",
+    "eur": "EUR",
+    "coin": "EMAMI1",
+    "gold": "GOL18",
 }
 
 
@@ -23,20 +23,15 @@ def fetch_prices():
     except Exception as exc:
         raise PriceAPIError(f"Failed to fetch prices: {exc}")
 
-    items = data.get("result", [])
-    if not isinstance(items, list):
-        raise PriceAPIError("Invalid API format: 'result' is not a list")
+    if not isinstance(data, list):
+        raise PriceAPIError("Invalid API format: expected list")
 
-    found = {}
-    for item in items:
-        key = item.get("key")
-        if key in TARGET_KEYS.values():
-            found[key] = item
+    price_map = {item.get("symbol"): item for item in data if "symbol" in item}
 
-    def get_by_key(target_key):
-        item = found.get(target_key)
+    def get_price(symbol):
+        item = price_map.get(symbol)
         if not item:
             return None
-        return item.get("price")
+        return item.get("sell")
 
-    return {name: get_by_key(key) for name, key in TARGET_KEYS.items()}
+    return {name: get_price(symbol) for name, symbol in TARGET_SYMBOLS.items()}
