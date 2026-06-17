@@ -64,7 +64,7 @@ uv sync
 Create a .env file in the root of the project:
 
 ```bash
-DEBUG=True
+DEBUG=
 SECRET_KEY=your_secret_key_here
 
 ALLOWED_HOSTS=
